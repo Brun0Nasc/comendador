@@ -1,7 +1,7 @@
 import psycopg
 import os
 from dotenv import load_dotenv
-from product import Product
+from product import Product, History
 
 def load_config():
     load_dotenv("creds.env")  # Load environment variables from .env file
@@ -53,7 +53,7 @@ def list_products():
     
     conn.close()
 
-def get_price_history(product_id):
+def get_price_history(product_id: int):
     conn = connect_database()
 
     with conn.cursor() as cur:
@@ -79,16 +79,59 @@ def get_price_history(product_id):
     
     conn.close()
 
+def create_product(product: Product):
+    conn = connect_database()
+
+    with conn.cursor() as cur:
+        cur.execute(f"""INSERT INTO t_produto (nome, descricao, categoria_id)
+                       VALUES ('{product.name}', '{product.brand}', {product.category});""")
+        conn.commit()
+    
+    conn.close()
+
+def register_price(history: History):
+    conn = connect_database()
+
+    with conn.cursor() as cur:
+        cur.execute(f"""INSERT INTO t_historico_preco (preco, produto_id, link)
+                        VALUES ({history.price}, {history.product_id}, '{history.link}');""")
+        conn.commit()
+    
+    conn.close()
+
 print("Choose an option:")
 print("1 - List categories")
 print("2 - List products")
 print("3 - Get price history")
-option = input("Option: ")
+print("4 - Create product")
+print("5 - Register product price")
 
-if option == "1":
+option = int(input("Option: "))
+
+if option == 1:
     list_categories()
-elif option == "2":
+elif option == 2:
     list_products()
-elif option == "3":
-    product_id = input("Product ID: ")
-    get_price_history(product_id)
+elif option == 3:
+    try:
+        product_id =int(input("Product ID: "))
+        get_price_history("a")
+    except ValueError as e:
+        print("Invalid option:", e.__str__())
+elif option == 4:
+    name = input("Product name: ")
+    brand = input("Product brand: ")
+    list_categories()
+    category = int(input("Category ID: "))
+    product = Product(name=name, brand=brand, category=category)
+    create_product(product)
+elif option == 5:
+    try:
+        list_products()
+        product_id = int(input("\nProduct ID: "))
+        price = float(input("Price: "))
+        link = input("Link: ")
+        history = History(price, product_id=product_id, link=link)
+        register_price(history)
+    except ValueError as e:
+        print("Invalid option:", e.__str__())

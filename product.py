@@ -1,9 +1,12 @@
 from datetime import datetime
 
 class History:
-    def __init__(self, price, dateTime):
+    def __init__(self, price, dateTime=None, product_id=None, link=None):
         self.price = price
-        self.dateTime = dateTime.strftime('%d/%m/%Y')
+        self.product_id = product_id
+        self.link = link
+        if dateTime != None:
+            self.dateTime = dateTime.strftime('%d/%m/%Y')
 
 class Product:
     def __init__(self, id=None, name=None, brand=None, category=None):
